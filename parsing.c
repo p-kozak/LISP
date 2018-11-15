@@ -8,6 +8,7 @@ static char input[2048];
 
 long eval(mpc_ast_t* sentence);
 long eval_operator(long current_sum, char* op, long next_number);
+int number_of_nodes(mpc_ast_t*sentence);
 
 int main(int argc, char **argv){
 	/* The following parsers are used to create grammar for spotting expressions in so called Polish notation - operator before number, let's say + 4 4 instead of 4+4,
@@ -48,6 +49,7 @@ $	The end of input is required.*/
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
 			long result = eval(r.output);
 		printf("%li\n", result);
+		printf("You used %d\n numbers in your equation", number_of_nodes(r.output));
 		mpc_ast_delete(r.output);
 		}else {
 			mpc_err_print(r.error);
@@ -81,7 +83,7 @@ long eval(mpc_ast_t* sentence){
 	long sum = eval(sentence->children[2]);
 	//iterate through remaining n children starting from position 3 and combine everything
 	int i = 3;
-	while(strstr(sentence->children[i]->tag, "expr")){
+	while(strstr(sentence->children[i]->tag, "expresion")){
 		sum = eval_operator(sum, operator, eval(sentence->children[i]));
 		i++;
 	}
@@ -98,6 +100,28 @@ long eval_operator(long current_sum, char* op, long next_number){
 		return current_sum * next_number;
 	if(!strcmp("/", op))
 		return current_sum / next_number;
+	if(!strcmp("%", op))
+		return current_sum % next_number;
 	return 0; 
 
 }
+
+int number_of_nodes(mpc_ast_t* sentence){
+	int sum_of_the_node = 0;
+	int sum_of_internal_nodes = 0;
+	int i = 2; 
+
+	if(strstr(sentence->tag, "number")){
+		sum_of_the_node++;
+		return sum_of_the_node;
+	}else{
+		while(strstr(sentence->children[i]->tag, "expresion")){
+			sum_of_internal_nodes = number_of_nodes(sentence->children[i]);
+			sum_of_the_node += sum_of_internal_nodes;
+			i++;
+		}
+
+	}
+	return sum_of_the_node; 
+}
+

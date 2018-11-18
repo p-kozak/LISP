@@ -48,9 +48,9 @@ $	The end of input is required.*/
 		mpc_result_t r; 
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
 			long result = eval(r.output);
-		printf("%li\n", result);
-		printf("You used %d\n numbers in your equation", number_of_nodes(r.output));
-		mpc_ast_delete(r.output);
+			printf("%li\n", result);
+			printf("You used %d numbers in your equation \n", number_of_nodes(r.output));
+			mpc_ast_delete(r.output);
 		}else {
 			mpc_err_print(r.error);
 			mpc_err_delete(r.error);
@@ -77,8 +77,12 @@ long eval(mpc_ast_t* sentence){
 	if(strstr(sentence->tag, "number")){    
 		return atoi(sentence->contents); // The contents are always chars so we convert it to integer
 	}
-	//If it's not a number, we are looking for a operator which is always a second child of the expresion(the first one is regular expresion mark)
+	//If it's not a number, we are looking for a operator which is always a second child of the expresion(the first one is regular expresion mark, opening parentheeses '('	)
 	char* operator = sentence->children[1]->contents;
+	//doesn't work yet, if there is - and onlt 1 numner return -number
+	if (!strcmp("-", operator) && !strcmp(sentence->children[3]->contents, ")")) {
+		return  -1 * atoi(sentence->children[2]->contents);
+	}
 	//the third child can be either number or another expresion, so we recursively call eval on it
 	long sum = eval(sentence->children[2]);
 	//iterate through remaining n children starting from position 3 and combine everything

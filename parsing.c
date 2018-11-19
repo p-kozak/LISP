@@ -4,6 +4,7 @@
 
 #include "eval.h"
 #include "mpc.h"
+#include "errors.h"
 
 static char input[2048];
 
@@ -13,7 +14,7 @@ int main(int argc, char **argv){
 	or * (+ 4 4) ( * 4 4) instead of (4+4)*(4*4) */
 	mpc_parser_t* Number = mpc_new("number");
 	mpc_parser_t* Operator = mpc_new("operator");
-	mpc_parser_t* Expresion = mpc_new("expresion");
+	mpc_parser_t* Expression = mpc_new("expression");
 	mpc_parser_t* Lisp = mpc_new("lisp");
 
 /*.	Any character is required.
@@ -30,10 +31,10 @@ $	The end of input is required.*/
 		"																\
 		number 		: /-?[0-9]+/					 				;	\
 		operator 	: '+' |'-' |'*'|'/'| '%' | \"min\" | \"max\" | '^'						;	\
-		expresion 	: <number> | '(' <operator> <expresion>+ ')'	; 	\
-		lisp 		: /^/ <operator> <expresion>+  /$/				;  	\
+		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
+		lisp 		: /^/ <operator> <expression>+  /$/				;  	\
 		",
-		Number, Operator, Expresion, Lisp);
+		Number, Operator, Expression, Lisp);
 
 	puts("Lisp v0.0.1");
 	puts("To exit, press Ctrl+c");
@@ -45,8 +46,8 @@ $	The end of input is required.*/
 		//The following code calls mpc_parse function on parser Lisp. Result of the parse is copied to the r and 1 is returned on success, 0 on failure
 		mpc_result_t r; 
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
-			long result = eval(r.output);
-			printf("%li\n", result);
+			lisp_value result = eval(r.output);
+			print_lisp_value_newline(result);
 			printf("You used %d numbers in your equation \n", number_of_nodes(r.output));
 			mpc_ast_delete(r.output);
 		}else {
@@ -56,6 +57,6 @@ $	The end of input is required.*/
 	}
 
 
-	mpc_cleanup(4, Number, Operator, Expresion, Lisp);
+	mpc_cleanup(4, Number, Operator, Expression, Lisp);
 	return 0; 	
 }

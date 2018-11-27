@@ -10,7 +10,7 @@ static char input[2048];
 
 
 int main(int argc, char **argv){
-	/* The following parsers are used to create grammar for spotting expressions in so called Polish notation - operator before number, let's say + 4 4 instead of 4+4,
+	/* The following parsers are used to create grammar for spotting expressions in so called prefix notation - operator before number, let's say + 4 4 instead of 4+4,
 	or * (+ 4 4) ( * 4 4) instead of (4+4)*(4*4) */
 	mpc_parser_t* Number = mpc_new("number");
 	mpc_parser_t* Operator = mpc_new("operator");
@@ -27,9 +27,10 @@ a+	One or more of the character a are required.
 ^	The start of input is required.
 $	The end of input is required.*/
 
+	// | /-?[0-9]+.?[0-9]*/
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"																\
-		number 		: /-?[0-9]+/					 				;	\
+		number 		: /-?[0-9]+/ | /-?[0-9]+.?[0-9]*/					 				;	\
 		operator 	: '+' |'-' |'*'|'/'| '%' | \"min\" | \"max\" | '^'						;	\
 		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
 		lisp 		: /^/ <operator> <expression>+  /$/				;  	\

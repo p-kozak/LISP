@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-lisp_value lisp_value_number(long x) {
+lisp_value lisp_value_number(double x) {
 	lisp_value v;
 	v.type = LISP_VALUE_NUMBER;
 	v.number = x;
@@ -22,7 +22,7 @@ lisp_value lisp_value_error(int x) {
 void print_lisp_value(lisp_value v) {
 	switch (v.type) {
 		case LISP_VALUE_NUMBER:
-			printf("%li", v.number);
+			printf("%f", v.number);
 			break;
 		case LISP_VALUE_ERROR:
 			if (v.error == LISP_VALUE_DIVIDE_ZERO) {

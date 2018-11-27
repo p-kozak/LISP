@@ -47,14 +47,14 @@ lisp_value eval(mpc_ast_t* sentence) {
 	if (strstr(sentence->tag, "number")) {
 		//check for error in coversion
 		errno = 0;
-		double x = strtol(sentence->contents, NULL, 10); //converts initial part of the string to long int - in our case, the whole expression
+		double x = strtod(sentence->contents, NULL); //converts initial part of the string to long int - in our case, the whole expression
 		return errno != ERANGE ? lisp_value_number(x) : lisp_value_error(LISP_VALUE_BAD_NUMBER);
 	}
 	//If it's not a number, we are looking for a operator which is always a second child of the expression(the first one is regular expression mark, opening parentheeses '('	)
 	char* operator = sentence->children[1]->contents;
 	//if there is - and onlt 1 numner return -number
 	if (!strcmp("-", operator) && !strstr(sentence->children[3]->tag, "expression")) {
-		double y = strtol(sentence->children[2]->contents, NULL, 10);
+		double y = strtod(sentence->children[2]->contents, NULL);
 		return errno != ERANGE ? lisp_value_number(-1 * y) : lisp_value_error(LISP_VALUE_BAD_NUMBER);
 	}
 

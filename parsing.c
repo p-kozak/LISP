@@ -17,7 +17,8 @@ int main(int argc, char **argv){
 	mpc_parser_t* Expression = mpc_new("expression");
 	mpc_parser_t* Lisp = mpc_new("lisp");
 
-/*.	Any character is required.
+/*
+.	Any character is required.
 a	The character a is required.
 [abcdef]	Any character in the set abcdef is required.
 [a-f]	Any character in the range a to f is required.
@@ -30,7 +31,7 @@ $	The end of input is required.*/
 	// | /-?[0-9]+.?[0-9]*/
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"																\
-		number 		: /-?[0-9]+/ | /-?[0-9]+.?[0-9]*/					 				;	\
+		number 		:  /-?[0-9]+[.][1-9]+/ |	/-?[0-9]+/ |			 				;	\
 		operator 	: '+' |'-' |'*'|'/'| '%' | \"min\" | \"max\" | '^'						;	\
 		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
 		lisp 		: /^/ <operator> <expression>+  /$/				;  	\
@@ -49,7 +50,8 @@ $	The end of input is required.*/
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
 			lisp_value result = eval(r.output);
 			print_lisp_value_newline(result);
-			printf("You used %d numbers in your equation \n", number_of_nodes(r.output));
+			 mpc_ast_print(r.output);
+			//printf("You used %d numbers in your equation \n", number_of_nodes(r.output));
 			mpc_ast_delete(r.output);
 		}else {
 			mpc_err_print(r.error);

@@ -78,3 +78,19 @@ void print_lisp_value_newline(lisp_value v){
 	print_lisp_value(v);
 	putchar('\n');
 }
+
+lisp_value* lisp_value_read_number(mpc_ast_t* sentence) {
+	errno = 0;
+	x = strtod(sentence->contents, NULL);
+	return errno != ERANGE ? lisp_value_number(x) : lisp_value_error("Invalid number");
+}
+lisp_value* lisp_value_read(mpc_ast_t* sentence) {
+	//if symbol or number, use a proper function
+	if (strstr(t->tag, "number")) {
+		return lisp_value_read_number(sentence->contents);
+	}
+	if (strstr(t->tag, "symbol")) {
+		return lisp_value_symbol
+	}
+	
+}

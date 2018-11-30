@@ -30,6 +30,8 @@ lisp_value* lisp_value_symbolic_expression(void);
 void lisp_value_delete(lisp_value* v);
 void print_lisp_value(lisp_value v);
 void print_lisp_value_newline(lisp_value v);
+lisp_value* lisp_value_read_number(mpc_ast_t* sentence);
+
 
 
 

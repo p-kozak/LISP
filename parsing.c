@@ -33,10 +33,11 @@ $	The end of input is required.*/
 		"																\
 		number 		:  /-?[0-9]+[.][1-9]+/ |	/-?[0-9]+/ |			 				;	\
 		operator 	: '+' |'-' |'*'|'/'| '%' | \"min\" | \"max\" | '^'						;	\
+		symbolic_expression : '(' <expression>* ')' ;							\
 		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
 		lisp 		: /^/ <operator> <expression>+  /$/				;  	\
 		",
-		Number, Operator, Expression, Lisp);
+		Number, Operator, Symbolic_expression, Expression, Lisp);
 
 	puts("Lisp v0.0.1");
 	puts("To exit, press Ctrl+c");
@@ -60,6 +61,6 @@ $	The end of input is required.*/
 	}
 
 
-	mpc_cleanup(4, Number, Operator, Expression, Lisp);
+	mpc_cleanup(5, Number, Operator, Symbolic_expression, Expression, Lisp);
 	return 0; 	
 }

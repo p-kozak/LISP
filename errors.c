@@ -81,7 +81,7 @@ void print_lisp_value_newline(lisp_value v){
 
 lisp_value* lisp_value_read_number(mpc_ast_t* sentence) {
 	errno = 0;
-	x = strtod(sentence->contents, NULL);
+	double x = strtod(sentence->contents, NULL);
 	return errno != ERANGE ? lisp_value_number(x) : lisp_value_error("Invalid number");
 }
 lisp_value* lisp_value_read(mpc_ast_t* sentence) {
@@ -90,7 +90,24 @@ lisp_value* lisp_value_read(mpc_ast_t* sentence) {
 		return lisp_value_read_number(sentence->contents);
 	}
 	if (strstr(t->tag, "symbol")) {
-		return lisp_value_symbol
+		return lisp_value_symbol(sentence->contents);
 	}
 	
+	//if tag is '>' or symbolic_expression then it's s-expression
+
+	lisp_value* x = NULL; 
+	if (!strcmp(sentence->tag, ">")  || !strcmp(sentence->tag, "symbolic expressioN")) {
+		x = lisp_value_symbolic_expression(sentence);
+	}
+	//then add all children to the the cell
+	for (int i = 0; i < sentence->children_num; i++) {
+		if (!strcmp(sentence->tag, "(") || !strcmp(sentence->tag, ")") || !strcmp(sentence->tag, "regex")) {
+			continue;
+		}
+		x = lisp_value_add_to_cell(x, lisp_value_read(sentence->children[i]);
+	}
+	return x;
+		
 }
+
+void lisp_value_add_to_cell(lisp_value* x, )

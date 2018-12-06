@@ -14,7 +14,7 @@ typedef struct lisp_value{
 	char* symbol;
 	//Counter a pointer to list of another symbolic expressions
 	int count;
-	struct lisp_expression** cell;
+	struct lisp_value** cell;
 } lisp_value;
 
 /* Create Enumeration of Possible lisp_value Types */

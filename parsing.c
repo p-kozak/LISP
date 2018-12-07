@@ -4,7 +4,7 @@
 
 #include "eval.h"
 #include "mpc.h"
-#include "errors.h"
+#include "general.h"
 
 static char input[2048];
 
@@ -14,6 +14,7 @@ int main(int argc, char **argv){
 	or * (+ 4 4) ( * 4 4) instead of (4+4)*(4*4) */
 	mpc_parser_t* Number = mpc_new("number");
 	mpc_parser_t* Operator = mpc_new("operator");
+	mpc_parser_t* Symbolic_expression = mpc_new("symbolic_expression");
 	mpc_parser_t* Expression = mpc_new("expression");
 	mpc_parser_t* Lisp = mpc_new("lisp");
 
@@ -49,10 +50,10 @@ $	The end of input is required.*/
 		//The following code calls mpc_parse function on parser Lisp. Result of the parse is copied to the r and 1 is returned on success, 0 on failure
 		mpc_result_t r; 
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
-			lisp_value result = eval(r.output);
-			print_lisp_value_newline(result);
+			lispValue result = eval(r.output);
+			lispValuePrintNewline(result);
 			 mpc_ast_print(r.output);
-			//printf("You used %d numbers in your equation \n", number_of_nodes(r.output));
+			//printf("You used %d numbers in your equation \n", numberOfNodes(r.output));
 			mpc_ast_delete(r.output);
 		}else {
 			mpc_err_print(r.error);

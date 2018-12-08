@@ -128,3 +128,25 @@ void lispValueExpressionPrint(lispValue* value, char open, char close){
 	putchar(close);
 }
 
+lispValue* lispValuePop(lispValue * value, int i) {
+	//this functions extracts i-th element of the expression and shifts elements after i backwards
+	lispValue* x = value ->cell[i];
+
+	//shift memory
+	memmove(v->cell[i], value->cell[i + 1],sizeof(lispValue)*(value->count-i-1));
+
+	//decrease the count as there is one less element
+	value->count--;
+
+	//reallocate the used memory
+	value->cell = realloc(value->cell, sizeof(lispValue)*value->count);
+
+	return v;
+}
+
+lispValue* lispValueTake(lispValue* value. int i) {
+	//this function takes i-th element, deletes the list and returns only this element
+	lispValue* x = v->cell[i];
+	lispValueDelete(v);
+	return x;
+}

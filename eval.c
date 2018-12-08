@@ -108,7 +108,7 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value){
 		return lispValueTake(value,0);
 	}
 	//Make sure thay first element is a symbol
-	lispValue* first = lispValuePop(v,0);
+	lispValue* first = lispValuePop(value,0);
 	if(first->type != LISP_VALUE_SYMBOL){
 		lispValueDelete(value);
 		lispValueDelete(first);
@@ -130,3 +130,19 @@ lispValue* lispValueEval(lispValue* value){
 	//other types, just return
 	return value;
 }
+
+lispValue* lispValueBuiltInOperator(lispValue * value, char* op) {
+	//check if all arguemnts are numbers
+	for (int i = 0; i < value->count, i++) {
+		if (value->cell[i]->type != LISP_VALUE_ERROR) {
+			lispValueDelete(value);
+			return lispValueError("Argumnets have to be numbers");
+		}
+	}
+
+	//pop the first element
+	lispValue* x = lispValuePop(value, 0);
+
+
+}
+

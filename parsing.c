@@ -10,10 +10,12 @@ static char input[2048];
 
 
 int main(int argc, char **argv){
+	puts("dupa/n");
+
 	/* The following parsers are used to create grammar for spotting expressions in so called prefix notation - operator before number, let's say + 4 4 instead of 4+4,
 	or * (+ 4 4) ( * 4 4) instead of (4+4)*(4*4) */
 	mpc_parser_t* Number = mpc_new("number");
-	mpc_parser_t* Operator = mpc_new("operator");
+	mpc_parser_t* Symbol = mpc_new("symbol");
 	mpc_parser_t* Symbolic_expression = mpc_new("symbolic_expression");
 	mpc_parser_t* Expression = mpc_new("expression");
 	mpc_parser_t* Lisp = mpc_new("lisp");
@@ -33,12 +35,12 @@ $	The end of input is required.*/
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"																\
 		number 		:  /-?[0-9]+[.][1-9]+/ |	/-?[0-9]+/ |			 				;	\
-		operator 	: '+' |'-' |'*'|'/' 						;	\
+		symbol 	: '+' |'-' |'*'|'/' 						;	\
 		symbolic_expression : '(' <expression>* ')' ;							\
 		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
 		lisp 		: /^/ <operator> <expression>+  /$/				;  	\
 		",
-		Number, Operator, Symbolic_expression, Expression, Lisp);
+		Number, Symbol, Symbolic_expression, Expression, Lisp);
 
 	puts("Lisp version bugged");
 	puts("To exit, press Ctrl+c");
@@ -46,6 +48,7 @@ $	The end of input is required.*/
 	while(1){
 		fputs("lisp> ", stdout);
 		fgets(input, 2048, stdin);
+		
 
 		//The following code calls mpc_parse function on parser Lisp. Result of the parse is copied to the r and 1 is returned on success, 0 on failure
 		mpc_result_t r;
@@ -55,6 +58,7 @@ $	The end of input is required.*/
 			 mpc_ast_print(r.output);
 			//printf("You used %d numbers in your equation \n", numberOfNodes(r.output));
 			mpc_ast_delete(r.output);
+
 		}else {
 			mpc_err_print(r.error);
 			mpc_err_delete(r.error);
@@ -62,6 +66,6 @@ $	The end of input is required.*/
 	}
 
 
-	mpc_cleanup(5, Number, Operator, Symbolic_expression, Expression, Lisp);
+	mpc_cleanup(5, Number, Symbol, Symbolic_expression, Expression, Lisp);
 	return 0;
 }

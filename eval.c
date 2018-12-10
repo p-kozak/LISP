@@ -92,8 +92,8 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value){
 	}
 
 	//check for errors
-	for(i = 0; i<value->count; i++){
-		if(value != NULL && value->cell[i] != NULL && value->cell[i]->type != NULL && value->cell[i]->type == LISP_VALUE_ERROR){
+	for(i = 0; i < value->count; i++){
+		if(value->cell[i]->type == LISP_VALUE_ERROR){
 			return lispValueTake(value,i);
 		}
 	}
@@ -125,7 +125,7 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value){
 
 lispValue* lispValueEval(lispValue* value){
 	//evaluate symbolic expressions
-	if(value != NULL && value->type != NULL && value->type == LISP_VALUE_SYMBOLIC_EXPRESSION ){
+	if(value->type == LISP_VALUE_SYMBOLIC_EXPRESSION ){
 		return lispValueEvalSymbolicExpression(value);
 	}
 	//other types, just return

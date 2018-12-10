@@ -67,7 +67,7 @@ void lispValuePrint(lispValue* value) {
 			printf("%s", value->symbol);
 			break;
 		case LISP_VALUE_SYMBOLIC_EXPRESSION:
-			lispValueExpressionPrint(value,')','(');
+			lispValueExpressionPrint(value,'(',')');
 			break;
 	}
 }
@@ -133,10 +133,10 @@ void lispValueExpressionPrint(lispValue* value, char open, char close){
 
 lispValue* lispValuePop(lispValue* value, int i) {
 	//this functions extracts i-th element of the expression and shifts elements after i backwards
-	lispValue* x = value ->cell[i];
+	lispValue* x = value->cell[i];
 
 	//shift memory
-	memmove(&value->cell[i], &value->cell[i+1], sizeof(lispValue)*(value->count-i-1));
+	memmove(&value->cell[i], &value->cell[i+1], sizeof(lispValue*)*(value->count-i-1));
 
 	//decrease the count as there is one less element
 	value->count--;

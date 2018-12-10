@@ -33,14 +33,14 @@ $	The end of input is required.*/
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"																\
 		number 		:  /-?[0-9]+[.][1-9]+/ |	/-?[0-9]+/ |			 				;	\
-		operator 	: '+' |'-' |'*'|'/'| '%' | \"min\" | \"max\" | '^'						;	\
+		operator 	: '+' |'-' |'*'|'/' 						;	\
 		symbolic_expression : '(' <expression>* ')' ;							\
 		expression 	: <number> | '(' <operator> <expression>+ ')'	; 	\
 		lisp 		: /^/ <operator> <expression>+  /$/				;  	\
 		",
 		Number, Operator, Symbolic_expression, Expression, Lisp);
 
-	puts("Lisp v0.0.1");
+	puts("Lisp version bugged");
 	puts("To exit, press Ctrl+c");
 
 	while(1){
@@ -48,9 +48,9 @@ $	The end of input is required.*/
 		fgets(input, 2048, stdin);
 
 		//The following code calls mpc_parse function on parser Lisp. Result of the parse is copied to the r and 1 is returned on success, 0 on failure
-		mpc_result_t r; 
+		mpc_result_t r;
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
-			lispValue result = eval(r.output);
+			lispValue* result = lispValueEval(lispValueRead(r.output));
 			lispValuePrintNewline(result);
 			 mpc_ast_print(r.output);
 			//printf("You used %d numbers in your equation \n", numberOfNodes(r.output));
@@ -63,5 +63,5 @@ $	The end of input is required.*/
 
 
 	mpc_cleanup(5, Number, Operator, Symbolic_expression, Expression, Lisp);
-	return 0; 	
+	return 0;
 }

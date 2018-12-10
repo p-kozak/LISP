@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "eval.h"
 
 typedef struct lispValue{
 	int type;
@@ -33,7 +32,9 @@ void lispValuePrint(lispValue* value);
 void lispValuePrintNewline(lispValue* value);
 lispValue* lispValueReadNumber(mpc_ast_t* sentence);
 lispValue* lispValueRead(mpc_ast_t* sentence);
-lispValue* lispValueAddToCell(lispValue* x, lispValue* value);
+lispValue* lispValueAddToCell(lispValue* value, lispValue* x);
+lispValue* lispValueTake(lispValue* value, int i);
+lispValue* lispValuePop(lispValue* value, int i);
 void lispValueExpressionPrint(lispValue* value, char open, char close);
 
 

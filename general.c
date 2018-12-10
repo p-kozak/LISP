@@ -8,22 +8,22 @@ lispValue* lispValueNumber(double x) {
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_NUMBER;
 	value->number = x;
-	return value; 
+	return value;
 }
 
 lispValue* lispValueError(char* x) {
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_ERROR;
 	value->error = malloc(strlen(x)+1);
-	stcrpy(value->error, x);
+	strcpy(value->error, x);
 	return value;
 }
 
 lispValue* lispValueSymbol(char* s) {
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_SYMBOL;
-	value->symbol = malloc(strlen(x) + 1);
-	stcrpy(value->symbol, s);
+	value->symbol = malloc(strlen(s) + 1);
+	strcpy(value->symbol, s);
 	return value;
 }
 
@@ -35,23 +35,26 @@ lispValue* lispValueSymbolicExpression(void) {
 	return value;
 }
 void lispValueDelete(lispValue* value) {
+	int i;
 	switch (value->type) {
 		case LISP_VALUE_NUMBER:
 			break;
-		case LISP_VALUE_ERROR: 
+		case LISP_VALUE_ERROR:
 			free(value->error);
 			break;
-		case: LISP_VALUE_SYMBOL:
+		case LISP_VALUE_SYMBOL:
 			free(value->symbol);
 			break;
 		case LISP_VALUE_SYMBOLIC_EXPRESSION:
-			for (int i = 0; i < value->count; i++) {
+			for (i = 0; i < value->count; i++) {
 				lispValueDelete(value->cell[i]);
 			}
 			free(value->cell);
+			break;
 	}
 	free(value);
 }
+
 void lispValuePrint(lispValue* value) {
 	switch (value->type) {
 		case LISP_VALUE_NUMBER:
@@ -63,8 +66,8 @@ void lispValuePrint(lispValue* value) {
 		case LISP_VALUE_SYMBOL:
 			printf("%s", value->symbol);
 			break;
-		case: LISP_VALUE_SYMBOLIC_EXPRESSION:
-			lispValueExpressionPrint(value);
+		case LISP_VALUE_SYMBOLIC_EXPRESSION:
+			lispValueExpressionPrint(value,')','(');
 			break;
 	}
 }
@@ -81,33 +84,33 @@ lispValue* lispValueReadNumber(mpc_ast_t* sentence) {
 	double x = strtod(sentence->contents, NULL);
 	return errno != ERANGE ? lispValueNumber(x) : lispValueError("Invalid number");
 }
+
 lispValue* lispValueRead(mpc_ast_t* sentence) {
 	//if symbol or number, use a proper function
-	if (strstr(t->tag, "number")) {
-		return lispValueReadNumber(sentence->contents);
+	if (strstr(sentence->tag, "number")) {
+		return lispValueReadNumber(sentence);
 	}
-	if (strstr(t->tag, "symbol")) {
+	if (strstr(sentence->tag, "symbol")) {
 		return lispValueSymbol(sentence->contents);
 	}
-	
 	//if tag is '>' or symbolic_expression then it's an s-expression
 
-	lispValue* x = NULL; 
-	if (!strcmp(sentence->tag, ">")  || !strcmp(sentence->tag, "symbolic expressioN")) {
-		x = lispValueSymbolicExpression(sentence);
+	lispValue* x = NULL;
+	if (!strcmp(sentence->tag, ">")  || !strcmp(sentence->tag, "symbolic_expression")) {
+		x = lispValueSymbolicExpression();
 	}
 	//then add all children to the the cell
-	for (int i = 0; i < sentence->children_num; i++) {
-		if (!strcmp(sentence->tag, "(") || !strcmp(sentence->tag, ")") || !strcmp(sentence->tag, "regex")) {
+	int i;
+	for(i = 0; i < sentence->children_num; i++) {
+		if (!strcmp(sentence->tag, "(") || !strcmp(sentence->tag, ")") || !strcmp(sentence->tag, "regex")){
 			continue;
 		}
-		x = lispValueAddToCell(x, lisp_value_read(sentence->children[i]);
+		x = lispValueAddToCell(x, lispValueRead(sentence->children[i]));
 	}
 	return x;
-		
 }
 
-lispValue* lispValueAddToCell(lispValue* x, lispValue* value){
+lispValue* lispValueAddToCell(lispValue* value, lispValue* x){
 	value->count++;
 	//reallocate memory of cell so it can handle new number of lisp_values
 	value->cell = realloc(value->cell, sizeof(lispValue*) * value->count);
@@ -117,8 +120,8 @@ lispValue* lispValueAddToCell(lispValue* x, lispValue* value){
 
 void lispValueExpressionPrint(lispValue* value, char open, char close){
 	putchar(open);
-
-	for(int i = 0; i < value->count; i++){
+	int i;
+	for(i = 0; i < value->count; i++){
 		lispValuePrint(value->cell[i]);
 		//put a space on each element except the last one
 		if(i != (value->count-1)){
@@ -128,25 +131,25 @@ void lispValueExpressionPrint(lispValue* value, char open, char close){
 	putchar(close);
 }
 
-lispValue* lispValuePop(lispValue * value, int i) {
+lispValue* lispValuePop(lispValue* value, int i) {
 	//this functions extracts i-th element of the expression and shifts elements after i backwards
 	lispValue* x = value ->cell[i];
 
 	//shift memory
-	memmove(v->cell[i], value->cell[i + 1],sizeof(lispValue)*(value->count-i-1));
+	memmove(&value->cell[i], &value->cell[i+1], sizeof(lispValue)*(value->count-i-1));
 
 	//decrease the count as there is one less element
 	value->count--;
 
 	//reallocate the used memory
-	value->cell = realloc(value->cell, sizeof(lispValue)*value->count);
+	value->cell = realloc(value->cell, sizeof(lispValue*)*value->count);
 
-	return v;
+	return x;
 }
 
-lispValue* lispValueTake(lispValue* value. int i) {
+lispValue* lispValueTake(lispValue* value, int i) {
 	//this function takes i-th element, deletes the list and returns only this element
-	lispValue* x = v->cell[i];
-	lispValueDelete(v);
+	lispValue* x = value->cell[i];
+	lispValueDelete(value);
 	return x;
 }

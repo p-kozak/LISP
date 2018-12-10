@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
-lispValue eval(mpc_ast_t* sentence);
-lispValue evalOperator(lispValue current_sum, char* op, lispValue next_number);
+//lispValue eval(mpc_ast_t* sentence);
+//lispValue evalOperator(lispValue current_sum, char* op, lispValue next_number);
 lispValue* lispValueEvalSymbolicExpression(lispValue* value);
 lispValue* lispValueEval(lispValue* value);
 int numberOfNodes(mpc_ast_t*sentence);

@@ -34,6 +34,7 @@ lispValue* lispValueSymbolicExpression(void) {
 	value->cell = NULL;
 	return value;
 }
+
 void lispValueDelete(lispValue* value) {
 	int i;
 	switch (value->type) {
@@ -102,8 +103,9 @@ lispValue* lispValueRead(mpc_ast_t* sentence) {
 	//then add all children to the the cell
 	int i;
 	for(i = 0; i < sentence->children_num; i++) {
-		if (!strcmp(sentence->tag, "(") || !strcmp(sentence->tag, ")") || !strcmp(sentence->tag, "regex")){
+		if (!strcmp(sentence->children[i]->contents, "(") || !strcmp(sentence->children[i]->contents, ")") || !strcmp(sentence->children[i]->tag, "regex")){
 			continue;
+			//here was the nasty bug which took me 8h to debug. i simply called wrong addresses in  above if...
 		}
 		x = lispValueAddToCell(x, lispValueRead(sentence->children[i]));
 	}

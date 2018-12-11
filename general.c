@@ -98,33 +98,26 @@ lispValue* lispValueRead(mpc_ast_t* sentence) {
 	if (strstr(sentence->tag, "symbol")) {
 		return lispValueSymbol(sentence->contents);
 	}
-	//if tag is '>' or symbolic_expression then it's an s-expression
+	//if tag is '>' or sym_expression then it's an s-expression
 
 	lispValue* x = NULL;
-	if (!strcmp(sentence->tag, ">")  || !strcmp(sentence->tag, "symbolic_expression")) {
+	if (!strcmp(sentence->tag, ">")  || strcmp(sentence->tag, "sym_expression")) {
 		x = lispValueSymbolicExpression();
 	}
 	//then add all children to the the cell
 	int i;
 	for(i = 0; i < sentence->children_num; i++) {
-		if (!strcmp(sentence->children[i]->contents, "(") || !strcmp(sentence->children[i]->contents, ")") || !strcmp(sentence->children[i]->tag, "regex")){
+		if (!strcmp(sentence->children[i]->contents,"(") || !strcmp(sentence->children[i]->contents, ")") || !strcmp(sentence->children[i]->tag, "regex")){
 			continue;
 			//here was the nasty bug which took me 8h to debug. i simply called wrong addresses in  above if...
 		}
 		x = lispValueAddToCell(x, lispValueRead(sentence->children[i]));
+
 	}
 	return x;
 }
 
 lispValue* lispValueAddToCell(lispValue* value, lispValue* x){
-	puts("Adding to cell ");
-	if(x->type == LISP_VALUE_NUMBER){
-		printf("%f\n" , x->number);
-	}else if(x->type == LISP_VALUE_SYMBOL){
-		printf("%s\n", x->symbol);
-	}else{
-		puts("shit");
-	}
 
 	value->count++;
 	//reallocate memory of cell so it can handle new number of lisp_values

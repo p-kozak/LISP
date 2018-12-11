@@ -83,6 +83,8 @@ lispValue* lispValueBuiltInOperator(lispValue * value, char* op){
 	for(i = 0; i < value->count; i++){
 		if (value->cell[i]->type != LISP_VALUE_NUMBER) {
 			printf("the bad type of cell[%d] is %d and it's %s \n", i, value->cell[i]->type, value->cell[i]->symbol);
+			puts(value->cell[i]->symbol);
+			//puts(value->cell[i]->number);
 			lispValueDelete(value);
 			return lispValueError("Arguments have to be numbers");
 		}

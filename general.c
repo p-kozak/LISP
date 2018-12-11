@@ -5,6 +5,7 @@
 #include <string.h>
 
 lispValue* lispValueNumber(double x) {
+	puts("Creating number");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_NUMBER;
 	value->number = x;
@@ -12,6 +13,7 @@ lispValue* lispValueNumber(double x) {
 }
 
 lispValue* lispValueError(char* x) {
+	puts("Creating error");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_ERROR;
 	value->error = malloc(strlen(x)+1);
@@ -20,6 +22,7 @@ lispValue* lispValueError(char* x) {
 }
 
 lispValue* lispValueSymbol(char* s) {
+	puts("Creating symbol");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_SYMBOL;
 	value->symbol = malloc(strlen(s) + 1);
@@ -28,6 +31,7 @@ lispValue* lispValueSymbol(char* s) {
 }
 
 lispValue* lispValueSymbolicExpression(void) {
+	puts("Creating symbolic expression");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_SYMBOLIC_EXPRESSION;
 	value->count = 0;
@@ -113,6 +117,15 @@ lispValue* lispValueRead(mpc_ast_t* sentence) {
 }
 
 lispValue* lispValueAddToCell(lispValue* value, lispValue* x){
+	puts("Adding to cell ");
+	if(x->type == LISP_VALUE_NUMBER){
+		printf("%f\n" , x->number);
+	}else if(x->type == LISP_VALUE_SYMBOL){
+		printf("%s\n", x->symbol);
+	}else{
+		puts("shit");
+	}
+
 	value->count++;
 	//reallocate memory of cell so it can handle new number of lisp_values
 	value->cell = realloc(value->cell, sizeof(lispValue*) * value->count);
@@ -138,20 +151,20 @@ lispValue* lispValuePop(lispValue* value, int i) {
 	lispValue* x = value->cell[i];
 
 	//shift memory
-	memmove(&value->cell[i], &value->cell[i+1], sizeof(lispValue*)*(value->count-i-1));
+	memmove(&value->cell[i], &value->cell[i+1], sizeof(lispValue*) * (value->count-i-1));
 
 	//decrease the count as there is one less element
 	value->count--;
 
 	//reallocate the used memory
-	value->cell = realloc(value->cell, sizeof(lispValue*)*value->count);
+	value->cell = realloc(value->cell, sizeof(lispValue*) * value->count);
 
 	return x;
 }
 
 lispValue* lispValueTake(lispValue* value, int i) {
 	//this function takes i-th element, deletes the list and returns only this element
-	lispValue* x = value->cell[i];
+	lispValue* x = lispValuePop(value,i);
 	lispValueDelete(value);
 	return x;
 }

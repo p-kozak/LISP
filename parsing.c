@@ -31,12 +31,12 @@ a+	One or more of the character a are required.
 $	The end of input is required.*/
 // /-?[0-9]+[.][0-9]+/  |
 	mpca_lang(MPCA_LANG_DEFAULT,
-	"                                                                                           \
-        number 		        :  /-?[0-9]+[.][0-9]+/  |	/-?[0-9]+/ 			 				;	\
+	"                          			                                                                  \
+        number 		       		:  /-?[0-9]+[.][0-9]+/  |	/-?[0-9]+/ 			 													;		\
         symbol              : '+' | '-' | '*' | '/'                                             ;   \
-        symbolic_expression : '(' <expression>* ')'                ;   \
-        expression          : <number> | < symbol> | < symbolic_expression>                       ;   \
-        lisp                : /^/ <expression>* /$/                      ;   \
+        symbolic_expression : '(' <expression>* ')'                															;   \
+        expression          : <number> | < symbol> | <symbolic_expression>                      ;   \
+        lisp                : /^/ <expression>* /$/                     												;   \
 		",
 		Number, Symbol, Symbolic_expression, Expression, Lisp);
 

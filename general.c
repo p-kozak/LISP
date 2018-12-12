@@ -5,7 +5,6 @@
 #include <string.h>
 
 lispValue* lispValueNumber(double x) {
-	puts("Creating number");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_NUMBER;
 	value->number = x;
@@ -13,7 +12,6 @@ lispValue* lispValueNumber(double x) {
 }
 
 lispValue* lispValueError(char* x) {
-	puts("Creating error");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_ERROR;
 	value->error = malloc(strlen(x)+1);
@@ -22,7 +20,6 @@ lispValue* lispValueError(char* x) {
 }
 
 lispValue* lispValueSymbol(char* s) {
-	puts("Creating symbol");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_SYMBOL;
 	value->symbol = malloc(strlen(s) + 1);
@@ -31,13 +28,21 @@ lispValue* lispValueSymbol(char* s) {
 }
 
 lispValue* lispValueSymbolicExpression(void) {
-	puts("Creating symbolic expression");
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_SYMBOLIC_EXPRESSION;
 	value->count = 0;
 	value->cell = NULL;
 	return value;
 }
+
+lispValue* lispValueQuotedExpression(void){
+	lispValue* value = malloc(sizeof(lispValue));
+	value->type = LISP_VALUE_QUOTED_EXPRESSION;
+	value->count = 0;
+	value->cell = NULL;
+	return value;
+}
+
 
 void lispValueDelete(lispValue* value) {
 	int i;
@@ -50,12 +55,16 @@ void lispValueDelete(lispValue* value) {
 		case LISP_VALUE_SYMBOL:
 			free(value->symbol);
 			break;
+			//for quoted and symbolic expressions the same deletion code will be executed as they
+			//are essentialy the same structure
+		case LISP_VALUE_QUOTED_EXPRESSION:
 		case LISP_VALUE_SYMBOLIC_EXPRESSION:
 			for (i = 0; i < value->count; i++) {
 				lispValueDelete(value->cell[i]);
 			}
 			free(value->cell);
 			break;
+
 	}
 	free(value);
 }
@@ -73,6 +82,9 @@ void lispValuePrint(lispValue* value) {
 			break;
 		case LISP_VALUE_SYMBOLIC_EXPRESSION:
 			lispValueExpressionPrint(value,'(',')');
+			break;
+		case LISP_VALUE_QUOTED_EXPRESSION:
+			lispValueExpressionPrint(value, '{','}');
 			break;
 	}
 }
@@ -98,11 +110,14 @@ lispValue* lispValueRead(mpc_ast_t* sentence) {
 	if (strstr(sentence->tag, "symbol")) {
 		return lispValueSymbol(sentence->contents);
 	}
-	//if tag is '>' or sym_expression then it's an s-expression
-
 	lispValue* x = NULL;
+
+	//if tag is '>' or sym_expression then it's an s-expression
 	if (!strcmp(sentence->tag, ">")  || strcmp(sentence->tag, "sym_expression")) {
 		x = lispValueSymbolicExpression();
+	}
+	if(strstr(sentence->tag, "quoted_expression")){
+		x = lispValueQuotedExpression();
 	}
 	//then add all children to the the cell
 	int i;
@@ -110,6 +125,9 @@ lispValue* lispValueRead(mpc_ast_t* sentence) {
 		if (!strcmp(sentence->children[i]->contents,"(") || !strcmp(sentence->children[i]->contents, ")") || !strcmp(sentence->children[i]->tag, "regex")){
 			continue;
 			//here was the nasty bug which took me 8h to debug. i simply called wrong addresses in  above if...
+		}
+		if (!strcmp(sentence->children[i]->contents,"{") || !strcmp(sentence->children[i]->contents, "}")){
+			continue;
 		}
 		x = lispValueAddToCell(x, lispValueRead(sentence->children[i]));
 
@@ -160,4 +178,48 @@ lispValue* lispValueTake(lispValue* value, int i) {
 	lispValue* x = lispValuePop(value,i);
 	lispValueDelete(value);
 	return x;
+}
+
+lispValueBuiltInHead(lispValue* value){
+	//check for errors
+	if(value->count != 1){
+		lispValueDelete(value);
+		return lispValueError("Function 'head' was passed too many arguments");
+	}
+	if(value->cell[0]->type != LISP_VALUE_QUOTED_EXPRESSION){
+		lispValueDelete(value);
+		return lispValueError("Function 'head' was passed an invalid type");
+	}
+	if(value->cell[0]->count == 0){
+		lispValueDelete(value);
+		return lispValueError("Function 'head' was passed an empty quoted expression {}");
+	}
+
+	//otherwise, take the first argument
+	lispValue* newValue = lispValueTake(value, 0);
+	//delete all non-head elements and return
+	while(newValue->count > 1){
+		lispValueDelete(lispValuePop(newValue,1));
+	}
+	return newValue;
+}
+
+lispValueBuiltInTail(lispValue* value){
+	if(value->count != 1){
+		lispValueDelete(value);
+		return lispValueError("Function 'tail' was passed too many arguments");
+	}
+	if(value->cell[0]->type != LISP_VALUE_QUOTED_EXPRESSION){
+		lispValueDelete(value);
+		return lispValueError("Function 'tail' was passed an invalid type");
+	}
+	if(value->cell[0]->count == 0){
+		lispValueDelete(value);
+		return lispValueError("Function 'tail' was passed an empty quoted expression {}");
+	}
+	//take the value of Quoted expression
+	lispValue* newValue = lispValueTake(value,0);
+	//dlete the first element
+	lispValueDelete(lispValuePop(value,0));
+	return newValue;
 }

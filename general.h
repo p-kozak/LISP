@@ -18,7 +18,7 @@ typedef struct lispValue{
 } lispValue;
 
 /* Create Enumeration of Possible lispValue Types */
-enum {LISP_VALUE_NUMBER, LISP_VALUE_ERROR, LISP_VALUE_SYMBOL, LISP_VALUE_SYMBOLIC_EXPRESSION};
+enum {LISP_VALUE_NUMBER, LISP_VALUE_ERROR, LISP_VALUE_SYMBOL, LISP_VALUE_SYMBOLIC_EXPRESSION, LISP_VALUE_QUOTED_EXPRESSION};
 
 //Create enumeration of possible error types now redundant as errors will soon be strings - gives more flexibility
 //enum{ LISP_VALUE_DIVIDE_ZERO, LISP_VALUE_BAD_OPERATOR, LISP_VALUE_BAD_NUMBER};
@@ -27,6 +27,7 @@ lispValue* lispValueNumber(double x);
 lispValue* lispValueError(char* x);
 lispValue* lispValueSymbol(char* s);
 lispValue* lispValueSymbolicExpression(void);
+lispValue* lispValueQuotedExpression(void);
 void lispValueDelete(lispValue* value);
 void lispValuePrint(lispValue* value);
 void lispValuePrintNewline(lispValue* value);

@@ -36,6 +36,10 @@ lispValue* lispValueRead(mpc_ast_t* sentence);
 lispValue* lispValueAddToCell(lispValue* value, lispValue* x);
 lispValue* lispValueTake(lispValue* value, int i);
 lispValue* lispValuePop(lispValue* value, int i);
+lispValue* lispValueBuiltInHead(lispValue* value);
+lispValue* lispValueBuiltInTail(lispValue* value);
+lispValue* lispValueBuiltInList(lispValue* value);
+lispValue* lispValueBuiltInEval(lispValue* value);
 void lispValueExpressionPrint(lispValue* value, char open, char close);
 
 

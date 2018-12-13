@@ -180,20 +180,13 @@ lispValue* lispValueTake(lispValue* value, int i) {
 	return x;
 }
 
-lispValueBuiltInHead(lispValue* value){
+lispValue* lispValueBuiltInHead(lispValue* value){
+	//head - takes quoted expression and return only the first element as quoted expression
+
 	//check for errors
-	if(value->count != 1){
-		lispValueDelete(value);
-		return lispValueError("Function 'head' was passed too many arguments");
-	}
-	if(value->cell[0]->type != LISP_VALUE_QUOTED_EXPRESSION){
-		lispValueDelete(value);
-		return lispValueError("Function 'head' was passed an invalid type");
-	}
-	if(value->cell[0]->count == 0){
-		lispValueDelete(value);
-		return lispValueError("Function 'head' was passed an empty quoted expression {}");
-	}
+	LISP_ASSERT(value, value->count ==1,"Function 'head' was passed too many arguments");
+	LISP_ASSERT(value, value->cell[0]->type==LISP_VALUE_QUOTED_EXPRESSION,"Function 'head' was passed an invalid type");
+	LISP_ASSERT(value, value->cell[0]->count != 0,"Function 'head' was passed an empty quoted expression {}");
 
 	//otherwise, take the first argument
 	lispValue* newValue = lispValueTake(value, 0);
@@ -204,22 +197,34 @@ lispValueBuiltInHead(lispValue* value){
 	return newValue;
 }
 
-lispValueBuiltInTail(lispValue* value){
-	if(value->count != 1){
-		lispValueDelete(value);
-		return lispValueError("Function 'tail' was passed too many arguments");
-	}
-	if(value->cell[0]->type != LISP_VALUE_QUOTED_EXPRESSION){
-		lispValueDelete(value);
-		return lispValueError("Function 'tail' was passed an invalid type");
-	}
-	if(value->cell[0]->count == 0){
-		lispValueDelete(value);
-		return lispValueError("Function 'tail' was passed an empty quoted expression {}");
-	}
+lispValue* lispValueBuiltInTail(lispValue* value){
+	//tail - takes quoted expression and return a quoted expression with first element removed
+
+	LISP_ASSERT(value, value->count ==1,"Function 'tail' was passed too many arguments");
+	LISP_ASSERT(value, value->cell[0]->type==LISP_VALUE_QUOTED_EXPRESSION,"Function 'tail' was passed an invalid type");
+	LISP_ASSERT(value, value->cell[0]->count != 0,"Function 'tail' was passed an empty quoted expression {}");
+
 	//take the value of Quoted expression
 	lispValue* newValue = lispValueTake(value,0);
 	//dlete the first element
 	lispValueDelete(lispValuePop(value,0));
 	return newValue;
+}
+
+lispValue* lispValueBuiltInList(lispValue* value){
+	//list - take one or more arguments and return new Quoted Expression containing them
+
+	value->type=LISP_VALUE_QUOTED_EXPRESSION;
+	return value;
+}
+
+lispValue* lispValueBuiltInEval(lispValue* value){
+	//eval - takes quoted expression and evaluates it as it was a symbolic expression
+	LISP_ASSERT(value, value->count==1, "Function 'eval' was passed too many arguments");
+	LISP_ASSERT(value, value->cell[0]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'eval' was passed an invalid type");
+
+	//take first element, change it's type to symbolic expression and evaluates
+	lispValue* newValue = lispValueTake(value,0);
+	newValue->type == LISP_VALUE_SYMBOLIC_EXPRESSION;
+	return lispValueEval(newValue);
 }

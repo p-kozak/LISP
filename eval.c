@@ -62,7 +62,7 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value){
 	}
 
 	//print result
-	lispValue* result = lispValueBuiltInOperator(value, first->symbol);
+	lispValue* result = lispValueBuiltIn(value, first->symbol);
 	lispValueDelete(first);
 	return result;
 }
@@ -127,4 +127,39 @@ lispValue* lispValueBuiltInOperator(lispValue * value, char* op){
 	return x;
 
 
+}
+
+lispValue* lispValueBuiltInEval(lispValue* value){
+	//eval - takes quoted expression and evaluates it as it was a symbolic expression
+	LISP_ASSERT(value, value->count==1, "Function 'eval' was passed too many arguments");
+	LISP_ASSERT(value, value->cell[0]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'eval' was passed an invalid type");
+
+	//take first element, change it's type to symbolic expression and evaluates
+	lispValue* newValue = lispValueTake(value,0);
+	newValue->type == LISP_VALUE_SYMBOLIC_EXPRESSION;
+	return lispValueEval(newValue);
+}
+
+
+lispValue* lispValueBuiltIn(lispValue* value, char* function){
+	if(!strcmp("list", function)){
+		return lispValueBuiltInList(value);
+	}
+	if(!strcmp("head", function)){
+		return lispValueBuiltInHead(value);
+	}
+	if(!strcmp("tail", function)){
+		return lispValueBuiltInTail(value);
+	}
+	if(!strcmp("join", function)){
+		return lispValueBuiltInJoin(value);
+	}
+	if(!strcmp("eval", function)){
+		return lispValueBuiltInEval(value);
+	}
+	if(strstr("+-/*", function)){
+		return lispValueBuiltInOperator(value, function);
+	}
+	lispValueDelete(value);
+	return lispValueError("Unknown function");
 }

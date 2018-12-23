@@ -13,5 +13,7 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value);
 lispValue* lispValueEval(lispValue* value);
 int numberOfNodes(mpc_ast_t*sentence);
 lispValue* lispValueBuiltInOperator(lispValue * value, char* op);
+lispValue* lispValueBuiltInEval(lispValue* value);
+lispValue* lispValueBuiltIn(lispValue* value, char* function);
 
 #endif

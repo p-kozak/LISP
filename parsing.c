@@ -6,12 +6,7 @@
 #include "mpc.h"
 #include "general.h"
 
-#define LISP_ASSERT(argument, condition, error){ \
-				if(!condition) { \
-					lispValueDelete(argument)}; \
-					return lispValueError("error");\
-				}\
-			}
+
 
 static char input[2048];
 
@@ -51,9 +46,9 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 	"                          			                                                                  \
         number 		       		:  /-?[0-9]+[.][0-9]+/  |	/-?[0-9]+/ 			 													;		\
         symbol              : '+' | '-' | '*' | '/' | \"list\" | 																						\
-														\"head\" | \"tail\" | \"join\" | \"eval\"                                            ;   \
+							\"head\" | \"tail\" | \"join\" | \"eval\"                                            ;   \
         sym_expression 			: '(' <expression>* ')'                															;   \
-				quoted_expression		: '{' <expression>* '}'																						;	\
+		quoted_expression		: '{' <expression>* '}'																						;	\
         expression          : <number> | < symbol> | <sym_expression>  | <quoted_expression>                   ;   \
         lisp                : /^/ <expression>* /$/                     												;   \
 		",

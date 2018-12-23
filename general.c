@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+
+
 lispValue* lispValueNumber(double x) {
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_NUMBER;
@@ -218,13 +220,29 @@ lispValue* lispValueBuiltInList(lispValue* value){
 	return value;
 }
 
-lispValue* lispValueBuiltInEval(lispValue* value){
-	//eval - takes quoted expression and evaluates it as it was a symbolic expression
-	LISP_ASSERT(value, value->count==1, "Function 'eval' was passed too many arguments");
-	LISP_ASSERT(value, value->cell[0]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'eval' was passed an invalid type");
 
-	//take first element, change it's type to symbolic expression and evaluates
-	lispValue* newValue = lispValueTake(value,0);
-	newValue->type == LISP_VALUE_SYMBOLIC_EXPRESSION;
-	return lispValueEval(newValue);
+lispValue* lispValueJoin(lispValue* value, lispValue* toAdd){
+	//repetively pop the first element of toAdd number and add it to the cell of target lisp value
+	while(toAdd->count){
+		value = lispValueAddToCell(value, lispValuePop(toAdd,0));
+	}
+	//new delete toAdd and return value
+	lispValueDelete(toAdd);
+	return value;
+}
+
+lispValue* lispValueBuiltInJoin(lispValue* value){
+	//first, check if all arguments are q-expressions
+	for(int i=0; i < value->count; i++){
+		LISP_ASSERT(value, value->cell[i]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'join' was passed incorrect type");
+	}
+	// now recursivelly join all other arguments
+	lispValue* newValue = lispValuePop(value,0);
+
+	while(value->count){
+		newValue = lispValueJoin(newValue, lispValuePop(value, 0));
+	}
+
+	lispValueDelete(value);
+	return newValue;
 }

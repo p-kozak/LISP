@@ -6,6 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#define LISP_ASSERT(argument, condition, error){ \
+				if(!(condition)) { \
+					lispValueDelete(argument); \
+					return lispValueError("error");\
+				}\
+			}
+
 typedef struct lispValue{
 	int type;
 	double number;
@@ -39,7 +46,8 @@ lispValue* lispValuePop(lispValue* value, int i);
 lispValue* lispValueBuiltInHead(lispValue* value);
 lispValue* lispValueBuiltInTail(lispValue* value);
 lispValue* lispValueBuiltInList(lispValue* value);
-lispValue* lispValueBuiltInEval(lispValue* value);
+lispValue* lispValueBuiltInJoin(lispValue* value);
+lispValue* lispValueJoin(lispValue* value, lispValue* toAdd);
 void lispValueExpressionPrint(lispValue* value, char open, char close);
 
 

@@ -209,7 +209,7 @@ lispValue* lispValueBuiltInTail(lispValue* value){
 	//take the value of Quoted expression
 	lispValue* newValue = lispValueTake(value,0);
 	//dlete the first element
-	lispValueDelete(lispValuePop(value,0));
+	lispValueDelete(lispValuePop(newValue,0));
 	return newValue;
 }
 

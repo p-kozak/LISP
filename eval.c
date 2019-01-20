@@ -157,6 +157,9 @@ lispValue* lispValueBuiltIn(lispValue* value, char* function){
 	if(!strcmp("eval", function)){
 		return lispValueBuiltInEval(value);
 	}
+	/*if (!strcmp("len", function)) {
+		return lispValueBuiltInLen(value);
+	}*/
 	if(strstr("+-/*", function)){
 		return lispValueBuiltInOperator(value, function);
 	}

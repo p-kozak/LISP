@@ -45,6 +45,15 @@ lispValue* lispValueQuotedExpression(void){
 	return value;
 }
 
+lispValue* lispValueFunction(lispBuiltIn function) {
+	lispValue* value = malloc(sizeof(lispValue));
+	value->type = LISP_VALUE_FUNCTION;
+	value->count = 0;
+	value->function = function;
+	return value;
+}
+
+
 
 void lispValueDelete(lispValue* value) {
 	int i;
@@ -56,6 +65,8 @@ void lispValueDelete(lispValue* value) {
 			break;
 		case LISP_VALUE_SYMBOL:
 			free(value->symbol);
+			break;
+		case LISP_VALUE_FUNCTION:
 			break;
 			//for quoted and symbolic expressions the same deletion code will be executed as they
 			//are essentialy the same structure
@@ -88,6 +99,10 @@ void lispValuePrint(lispValue* value) {
 		case LISP_VALUE_QUOTED_EXPRESSION:
 			lispValueExpressionPrint(value, '{','}');
 			break;
+		case LISP_VALUE_FUNCTION:
+			printf("<function>"); //just print a generic string
+			break;
+
 	}
 }
 
@@ -194,6 +209,7 @@ lispValue* lispValueBuiltInHead(lispValue* value){
 	lispValue* newValue = lispValueTake(value, 0);
 	//delete all non-head elements and return
 	while(newValue->count > 1){
+		puts("Im actually removing");
 		lispValueDelete(lispValuePop(newValue,1));
 	}
 	return newValue;
@@ -245,4 +261,68 @@ lispValue* lispValueBuiltInJoin(lispValue* value){
 
 	lispValueDelete(value);
 	return newValue;
+}
+
+
+//lispValue* lispValueBuiltInLen(lispValue* value);
+
+lispValue* lispValueCopy(lispValue* value) {
+	lispValue* newValue = malloc(sizeof(lispValue));
+	newValue->type = value->type;
+	switch (newValue->type) {
+	case LISP_VALUE_NUMBER:
+		newValue->number = value->number;
+		break;
+	case LISP_VALUE_FUNCTION:
+		newValue->function = value->function;
+		break;
+	case LISP_VALUE_ERROR:
+		newValue->error = malloc(strlen(value->error)+1);
+		strcpy(newValue->error, value->error);
+		break;
+	case LISP_VALUE_SYMBOL:
+		newValue->symbol = malloc(strlen(value->symbol) + 1);
+		strcpy(newValue->symbol, value->symbol);
+		break;
+	case LISP_VALUE_SYMBOLIC_EXPRESSION:
+		newValue->count = value->count;
+		newValue->cell = malloc(sizeof(lispValue) * value->count);
+		for (int i = 0; i < newValue->count; i++) {
+			//recursive copy
+			newValue->cell[i] = lispValueCopy(value->cell[i]);
+		}
+		break;
+	case LISP_VALUE_QUOTED_EXPRESSION: 
+		newValue->count = value->count;
+		newValue->cell = malloc(sizeof(lispValue) * value->count);
+		for (int i = 0; i < newValue->count; i++) {
+			//recursive copy
+			newValue->cell[i] = lispValueCopy(value->cell[i]);
+		}
+		break;
+
+	}
+
+	return newValue;
+}
+
+
+lispEnvironemnt* lispEnvironemntNew(void) {
+	lispEnvironemnt* environemnt = malloc(sizeof(lispEnvironemnt));
+	environemnt->count = 0;
+	environemnt->symbols = NULL;
+	environemnt->values = NULL;
+	
+	return environemnt;
+}
+
+void lispEnvironemntDelete(lispEnvironemnt* environment) {
+	for (int i = 0; i < environment->count; i++) {
+		lispValueDelete(environment->values[i]);
+		free(environment->symbols[i]);
+	}
+	free(environment->symbols);
+	free(environment->)
+	free(environment);
+	return;
 }

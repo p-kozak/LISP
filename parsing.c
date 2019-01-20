@@ -45,8 +45,7 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 	mpca_lang(MPCA_LANG_DEFAULT,
 	"                          			                                                                  \
         number 		       		:  /-?[0-9]+[.][0-9]+/  |	/-?[0-9]+/ 			 													;		\
-        symbol              : '+' | '-' | '*' | '/' | \"list\" | 																						\
-							\"head\" | \"tail\" | \"join\" | \"eval\"                                            ;   \
+        symbol              : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/                                          ;   \
         sym_expression 			: '(' <expression>* ')'                															;   \
 		quoted_expression		: '{' <expression>* '}'																						;	\
         expression          : <number> | < symbol> | <sym_expression>  | <quoted_expression>                   ;   \
@@ -65,8 +64,8 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 		//The following code calls mpc_parse function on parser Lisp. Result of the parse is copied to the r and 1 is returned on success, 0 on failure
 		mpc_result_t r;
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
-			lispValue* result = lispValueRead(r.output);
-			//lispValue* result = lispValueEval(lispValueRead(r.output));
+			//lispValue* result = lispValueRead(r.output);
+			lispValue* result = lispValueEval(lispValueRead(r.output));
 			lispValuePrintNewline(result);
 
 			//mpc_ast_print(r.output);

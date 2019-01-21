@@ -29,7 +29,7 @@ int numberOfNodes(mpc_ast_t* sentence) {
 	return sum_of_the_node;
 }
 
-lispValue* lispValueEvalSymbolicExpression(lispValue* value){
+lispValue* lispValueEvalSymbolicExpression(lispEnvironment* lispValue* value){
 	//first evaluate all children
 	int i;
 	for(i = 0; i < value->count; i++){
@@ -68,8 +68,12 @@ lispValue* lispValueEvalSymbolicExpression(lispValue* value){
 }
 
 
-lispValue* lispValueEval(lispValue* value){
-	//evaluate symbolic expressions
+lispValue* lispValueEval(lispEnvironment* environment, lispValue* value){
+	if (value->type == LISP_VALUE_SYMBOL) {
+		lispValue* newValue = lispValueGet(environment, value);
+		lispValueDelete(value);
+		return newValue;
+	}
 	if(value->type == LISP_VALUE_SYMBOLIC_EXPRESSION ){
 		return lispValueEvalSymbolicExpression(value);
 	}

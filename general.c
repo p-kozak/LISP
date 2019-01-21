@@ -307,16 +307,16 @@ lispValue* lispValueCopy(lispValue* value) {
 }
 
 
-lispEnvironemnt* lispEnvironemntNew(void) {
-	lispEnvironemnt* environemnt = malloc(sizeof(lispEnvironemnt));
-	environemnt->count = 0;
-	environemnt->symbols = NULL;
-	environemnt->values = NULL;
+lispEnvironment* lispEnvironmentNew(void) {
+	lispEnvironment* environment = malloc(sizeof(lispEnvironment));
+	environment->count = 0;
+	environment->symbols = NULL;
+	environment->values = NULL;
 	
-	return environemnt;
+	return environment;
 }
 
-void lispEnvironemntDelete(lispEnvironemnt* environment) {
+void lispEnvironmentDelete(lispEnvironment* environment) {
 	for (int i = 0; i < environment->count; i++) {
 		lispValueDelete(environment->values[i]);
 		free(environment->symbols[i]);
@@ -326,3 +326,36 @@ void lispEnvironemntDelete(lispEnvironemnt* environment) {
 	free(environment);
 	return;
 }
+
+lispValue * lispEnvironmentGet(lispEnvironment * environment, lispValue * value){
+	//this function checks if the variable of the same name already exists in the environment. If it does, it returns a copy of the lispValue from environment
+	fir(int i = 0; i < environment->count; i++) {
+		if (!strcmp(environment->symbols[i], value->symbol))
+			return lispValueCopy(environment->values[i);
+	}
+	//Otherwise, return an error
+	return lispValueError("Unbound symbol");
+}
+
+void lispEnvironmentPut(lispEnvironment* environment, lispValue* oldValue, lispValue* newValue) {
+	//Firstly, iterate over all elements of the environment to check if oldValue is already there
+	for (int i = 0; i < environment->count; i++) {
+		if (!strcmp(environment->symbols[i], oldValue->symbol)) {
+			//If variable with the same symbol as oldValue is there, replace it with newValue
+			lispValueDelete(environment->values[i]);
+			environment->values[i] = lispValueCopy(newValue);
+			return;
+		}
+	}
+	//If oldValue does not exist in the environment, then reallocate memory and place it in the environment
+	environment->count++;
+	environment->values = realloc(sizeof(lispValue)*environment->count);
+	environment->symbols = realloc(sizeof(char*)*environment->count);
+
+	environment->values[environment->count - 1] = lispValueCopy(newValue);
+	environment->symbols[environment->count - 1] = malloc(strlen(newValue->symbol) + 1);
+	strcpy(environment->symbols[environment->count - 1], newValue->symbol);
+	
+	return;
+}
+

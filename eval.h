@@ -9,8 +9,8 @@
 
 //lispValue eval(mpc_ast_t* sentence);
 //lispValue evalOperator(lispValue current_sum, char* op, lispValue next_number);
-lispValue* lispValueEvalSymbolicExpression(lispValue* value);
-lispValue* lispValueEval(lispValue* value);
+lispValue* lispValueEvalSymbolicExpression(lispEnvironment* environment, lispValue* value);
+lispValue* lispValueEval(lispEnvironment* environment, lispValue* value);
 int numberOfNodes(mpc_ast_t*sentence);
 lispValue* lispValueBuiltInOperator(lispValue * value, char* op);
 lispValue* lispValueBuiltInEval(lispValue* value);

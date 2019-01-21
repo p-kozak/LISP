@@ -13,9 +13,12 @@
 				}\
 			}
 
+//lispValue an lispEnvorinment are cyclic dependant on each other, therefore this forward declaration
 typedef struct lispValue lispValue; 
-typedef struct lispEnvironemnt lispEnvironemnt; 
+typedef struct lispEnvironment lispEnvironment;
 
+//Predefined pointer to a function lispBuiltin. It takes pointers to lispEnvironemnt and lispValue, returns pointer to lispValue.
+//This is quite convoluted syntax
 typedef lispValue*(*lispBuiltIn)(lispEnvironemnt*, lispValue*);
 
 struct lispValue{
@@ -26,7 +29,7 @@ struct lispValue{
 	char* symbol;
 	//The function pointer:
 	lispBuiltIn function; 
-	//Counter a pointer to list of another symbolic expressions
+	//Counter and a pointer to list of another symbolic expressions
 	int count;
 	struct lispValue** cell;
 };
@@ -67,11 +70,12 @@ lispValue* lispValueBuiltInList(lispValue* value);
 lispValue* lispValueBuiltInJoin(lispValue* value);
 lispValue* lispValueJoin(lispValue* value, lispValue* toAdd);
 lispValue* lispValueBuiltInLen(lispValue* value);
-lispValue* lispValueBuiltInLen(lispValue* value);
 lispValue* lispValueCopy(lispValue* value);
 
-lispEnvironemnt* lispEnvironemntNew(void);
-void lispEnvironemntDelete(lispEnvironemnt* environemnt);
+lispEnvironment* lispEnvironmentNew(void);
+void lispEnvironmentDelete(lispEnvironment* environement);
+lispValue* lispEnvironmentGet(lispEnvironment* environment, lispValue* value);
+void lispEnvironmentPut(lispEnvironment* environment, lispValue* oldValue, lispValue* newValue);
 
 void lispValueExpressionPrint(lispValue* value, char open, char close);
 

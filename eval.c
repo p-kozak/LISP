@@ -29,11 +29,11 @@ int numberOfNodes(mpc_ast_t* sentence) {
 	return sum_of_the_node;
 }
 
-lispValue* lispValueEvalSymbolicExpression(lispEnvironment* lispValue* value){
+lispValue* lispValueEvalSymbolicExpression(lispEnvironment* environment, lispValue* value){
 	//first evaluate all children
 	int i;
 	for(i = 0; i < value->count; i++){
-		value->cell[i]= lispValueEval(value->cell[i]);
+		value->cell[i]= lispValueEval(environment, value->cell[i]);
 	}
 
 	//check for errors
@@ -53,16 +53,16 @@ lispValue* lispValueEvalSymbolicExpression(lispEnvironment* lispValue* value){
 		return lispValueTake(value,0);
 	}
 
-	//Make sure thay first element is a symbol
+	//Make sure thay first element is a function after evaluation
 	lispValue* first = lispValuePop(value,0);
-	if(first->type != LISP_VALUE_SYMBOL){
+	if(first->type != LISP_VALUE_FUNCTION){
 		lispValueDelete(value);
 		lispValueDelete(first);
-		return lispValueError("Symbolic expression doesn't start with symbol");
+		return lispValueError("Symbolic expression doesn't start with function");
 	}
 
 	//print result
-	lispValue* result = lispValueBuiltIn(value, first->symbol);
+	lispValue* result = first->function(environment, value);
 	lispValueDelete(first);
 	return result;
 }
@@ -70,18 +70,18 @@ lispValue* lispValueEvalSymbolicExpression(lispEnvironment* lispValue* value){
 
 lispValue* lispValueEval(lispEnvironment* environment, lispValue* value){
 	if (value->type == LISP_VALUE_SYMBOL) {
-		lispValue* newValue = lispValueGet(environment, value);
+		lispValue* newValue = lispEnvironmentGet(environment, value);
 		lispValueDelete(value);
 		return newValue;
 	}
 	if(value->type == LISP_VALUE_SYMBOLIC_EXPRESSION ){
-		return lispValueEvalSymbolicExpression(value);
+		return lispValueEvalSymbolicExpression(environment, value);
 	}
 	//other types, just return
 	return value;
 }
 
-lispValue* lispValueBuiltInOperator(lispValue * value, char* op){
+lispValue* lispValueBuiltInOperator(lispEnvironment* environment, lispValue * value, char* op){
 	//check if all arguments are numbers
 	int i;
 	for(i = 0; i < value->count; i++){
@@ -129,11 +129,26 @@ lispValue* lispValueBuiltInOperator(lispValue * value, char* op){
 	}
 	lispValueDelete(value);
 	return x;
-
-
 }
 
-lispValue* lispValueBuiltInEval(lispValue* value){
+//Here are the indiviudal built in maths functions
+
+lispValue* builtInAdd(lispEnvironment* environment, lispValue* value) {
+	return lispValueBuiltInOperator(environment, value, "+");
+}
+lispValue* builtInSub(lispEnvironment* environment, lispValue* value) {
+	return lispValueBuiltInOperator(environment, value, "-");
+}
+
+lispValue* builtInMul(lispEnvironment* environment, lispValue* value) {
+	return lispValueBuiltInOperator(environment, value, "*");
+}
+
+lispValue* builtInDiv(lispEnvironment* environment, lispValue* value) {
+	return lispValueBuiltInOperator(environment, value, "/");
+}
+
+lispValue* lispValueBuiltInEval(lispEnvironment* environment, lispValue* value){
 	//eval - takes quoted expression and evaluates it as it was a symbolic expression
 	LISP_ASSERT(value, value->count==1, "Function 'eval' was passed too many arguments");
 	LISP_ASSERT(value, value->cell[0]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'eval' was passed an invalid type");
@@ -141,32 +156,64 @@ lispValue* lispValueBuiltInEval(lispValue* value){
 	//take first element, change it's type to symbolic expression and evaluates
 	lispValue* newValue = lispValueTake(value,0);
 	newValue->type == LISP_VALUE_SYMBOLIC_EXPRESSION;
-	return lispValueEval(newValue);
+	return lispValueEval(environment, newValue);
 }
 
 
-lispValue* lispValueBuiltIn(lispValue* value, char* function){
+lispValue* lispValueBuiltIn(lispEnvironment* environment, lispValue* value, char* function){
 	if(!strcmp("list", function)){
-		return lispValueBuiltInList(value);
+		return lispValueBuiltInList(environment, value);
 	}
 	if(!strcmp("head", function)){
-		return lispValueBuiltInHead(value);
+		return lispValueBuiltInHead(environment, value);
 	}
 	if(!strcmp("tail", function)){
-		return lispValueBuiltInTail(value);
+		return lispValueBuiltInTail(environment, value);
 	}
 	if(!strcmp("join", function)){
-		return lispValueBuiltInJoin(value);
+		return lispValueBuiltInJoin(environment, value);
 	}
 	if(!strcmp("eval", function)){
-		return lispValueBuiltInEval(value);
+		return lispValueBuiltInEval(environment, value);
 	}
 	/*if (!strcmp("len", function)) {
 		return lispValueBuiltInLen(value);
 	}*/
 	if(strstr("+-/*", function)){
-		return lispValueBuiltInOperator(value, function);
+		return lispValueBuiltInOperator(environment, value, function);
 	}
 	lispValueDelete(value);
 	return lispValueError("Unknown function");
+}
+
+
+void lispEnvironmentAddBuiltIn(lispEnvironment* environment, char* name, lispBuiltIn function) {
+	//This function adds another functions to the environment so they can be executed on the variables from this environment
+	/*This works as lispBuiltIn is defined as 
+	lispValue*(*lispBuiltIn)(lispEnvironment*, lispValue*)
+	this means it can take any function taking the same arguments and returning pointer to lispValue */
+	lispValue* symbolDummy = lispValueSymbol(name);
+	lispValue* functionDummy = lispValueFunction(function);
+	lispEnvironmentPut(environment, symbolDummy, functionDummy);
+	lispValueDelete(symbolDummy);
+	lispValueDelete(functionDummy);
+	return;
+}
+void lispEnvironmentAddBuiltIns(lispEnvironment* environment) {
+	//Q-expressions lists functions
+	lispEnvironmentAddBuiltIn(environment, "list", lispValueBuiltInList);
+	lispEnvironmentAddBuiltIn(environment, "head", lispValueBuiltInHead);
+	lispEnvironmentAddBuiltIn(environment, "tail", lispValueBuiltInTail);
+	lispEnvironmentAddBuiltIn(environment, "join", lispValueBuiltInJoin);
+	lispEnvironmentAddBuiltIn(environment, "eval", lispValueBuiltInEval);
+
+	//Maths functions
+	lispEnvironmentAddBuiltIn(environment, "+", builtInAdd);
+	lispEnvironmentAddBuiltIn(environment, "-", builtInSub);
+	lispEnvironmentAddBuiltIn(environment, "/", builtInDiv);
+	lispEnvironmentAddBuiltIn(environment, "*", builtInMul);
+
+
+	//other functions
+	return;
 }

@@ -197,7 +197,7 @@ lispValue* lispValueTake(lispValue* value, int i) {
 	return x;
 }
 
-lispValue* lispValueBuiltInHead(lispValue* value){
+lispValue* lispValueBuiltInHead(lispEnvironment* environment, lispValue* value){
 	//head - takes quoted expression and return only the first element as quoted expression
 
 	//check for errors
@@ -209,13 +209,12 @@ lispValue* lispValueBuiltInHead(lispValue* value){
 	lispValue* newValue = lispValueTake(value, 0);
 	//delete all non-head elements and return
 	while(newValue->count > 1){
-		puts("Im actually removing");
 		lispValueDelete(lispValuePop(newValue,1));
 	}
 	return newValue;
 }
 
-lispValue* lispValueBuiltInTail(lispValue* value){
+lispValue* lispValueBuiltInTail(lispEnvironment* environment, lispValue* value){
 	//tail - takes quoted expression and return a quoted expression with first element removed
 
 	LISP_ASSERT(value, value->count ==1,"Function 'tail' was passed too many arguments");
@@ -229,7 +228,7 @@ lispValue* lispValueBuiltInTail(lispValue* value){
 	return newValue;
 }
 
-lispValue* lispValueBuiltInList(lispValue* value){
+lispValue* lispValueBuiltInList(lispEnvironment* environment, lispValue* value){
 	//list - take one or more arguments and return new Quoted Expression containing them
 
 	value->type=LISP_VALUE_QUOTED_EXPRESSION;
@@ -247,7 +246,7 @@ lispValue* lispValueJoin(lispValue* value, lispValue* toAdd){
 	return value;
 }
 
-lispValue* lispValueBuiltInJoin(lispValue* value){
+lispValue* lispValueBuiltInJoin(lispEnvironment* environment, lispValue* value){
 	//first, check if all arguments are q-expressions
 	for(int i=0; i < value->count; i++){
 		LISP_ASSERT(value, value->cell[i]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function 'join' was passed incorrect type");
@@ -322,39 +321,40 @@ void lispEnvironmentDelete(lispEnvironment* environment) {
 		free(environment->symbols[i]);
 	}
 	free(environment->symbols);
-	free(environment->)
+	free(environment->values);
 	free(environment);
 	return;
 }
 
-lispValue * lispEnvironmentGet(lispEnvironment * environment, lispValue * value){
+lispValue* lispEnvironmentGet(lispEnvironment * environment, lispValue * value){
 	//this function checks if the variable of the same name already exists in the environment. If it does, it returns a copy of the lispValue from environment
-	fir(int i = 0; i < environment->count; i++) {
-		if (!strcmp(environment->symbols[i], value->symbol))
-			return lispValueCopy(environment->values[i);
+	for (int i = 0; i < environment->count; i++) {
+		if (!strcmp(environment->symbols[i], value->symbol)) {
+			return lispValueCopy(environment->values[i]);
+		}
 	}
 	//Otherwise, return an error
 	return lispValueError("Unbound symbol");
 }
 
-void lispEnvironmentPut(lispEnvironment* environment, lispValue* oldValue, lispValue* newValue) {
+void lispEnvironmentPut(lispEnvironment* environment, lispValue* symbolDummy, lispValue* functionDummy) {
 	//Firstly, iterate over all elements of the environment to check if oldValue is already there
 	for (int i = 0; i < environment->count; i++) {
-		if (!strcmp(environment->symbols[i], oldValue->symbol)) {
+		if (!strcmp(environment->symbols[i], symbolDummy->symbol)) {
 			//If variable with the same symbol as oldValue is there, replace it with newValue
 			lispValueDelete(environment->values[i]);
-			environment->values[i] = lispValueCopy(newValue);
+			environment->values[i] = lispValueCopy(functionDummy);
 			return;
 		}
 	}
 	//If oldValue does not exist in the environment, then reallocate memory and place it in the environment
 	environment->count++;
-	environment->values = realloc(sizeof(lispValue)*environment->count);
-	environment->symbols = realloc(sizeof(char*)*environment->count);
+	environment->values = realloc(environment->values, sizeof(lispValue)*environment->count);
+	environment->symbols = realloc(environment->symbols, sizeof(char*)*environment->count);
 
-	environment->values[environment->count - 1] = lispValueCopy(newValue);
-	environment->symbols[environment->count - 1] = malloc(strlen(newValue->symbol) + 1);
-	strcpy(environment->symbols[environment->count - 1], newValue->symbol);
+	environment->values[environment->count - 1] = lispValueCopy(functionDummy);
+	environment->symbols[environment->count - 1] = malloc(strlen(symbolDummy->symbol) + 1);
+	strcpy(environment->symbols[environment->count - 1], symbolDummy->symbol);
 	
 	return;
 }

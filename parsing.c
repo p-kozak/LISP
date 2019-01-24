@@ -55,7 +55,9 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 
 	puts("Lisp version bugged");
 	puts("To exit, press Ctrl+c");
-
+	//Environment for functions and variables
+	lispEnvironment* environment = lispEnvironmentNew();
+	lispEnvironmentAddBuiltIns(environment);
 	while(1){
 		fputs("lisp> ", stdout);
 		fgets(input, 2048, stdin);
@@ -65,7 +67,7 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 		mpc_result_t r;
 		if(mpc_parse("<stdin>", input, Lisp, &r)){
 			//lispValue* result = lispValueRead(r.output);
-			lispValue* result = lispValueEval(lispValueRead(r.output));
+			lispValue* result = lispValueEval(environment,lispValueRead(r.output));
 			lispValuePrintNewline(result);
 
 			//mpc_ast_print(r.output);
@@ -79,8 +81,10 @@ eval - takes quoted expression and evaluates it as it was a symbolic expression
 			mpc_err_delete(r.error);
 		}
 	}
+	lispEnvironmentDelete(environment);
 
 
 	mpc_cleanup(6, Number, Symbol, Sym_expression, Quoted_expression, Expression, Lisp);
 	return 0;
 }
+

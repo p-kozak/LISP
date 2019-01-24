@@ -12,8 +12,16 @@
 lispValue* lispValueEvalSymbolicExpression(lispEnvironment* environment, lispValue* value);
 lispValue* lispValueEval(lispEnvironment* environment, lispValue* value);
 int numberOfNodes(mpc_ast_t*sentence);
-lispValue* lispValueBuiltInOperator(lispValue * value, char* op);
-lispValue* lispValueBuiltInEval(lispValue* value);
-lispValue* lispValueBuiltIn(lispValue* value, char* function);
+lispValue* lispValueBuiltInOperator(lispEnvironment* environment, lispValue * value, char* op);
+lispValue* lispValueBuiltInEval(lispEnvironment* environment, lispValue* value);
+lispValue* lispValueBuiltIn(lispEnvironment* environment, lispValue* value, char* function);
+lispValue* builtInAdd(lispEnvironment* environment, lispValue* value);
+lispValue* builtInSub(lispEnvironment* environment, lispValue* value);
+lispValue* builtInMul(lispEnvironment* environment, lispValue* value);
+lispValue* builtInDiv(lispEnvironment* environment, lispValue* value);
+
+void lispEnvironmentAddBuiltIn(lispEnvironment* environment, char* name, lispBuiltIn function);
+void lispEnvironmentAddBuiltIns(lispEnvironment* environment);
+
 
 #endif

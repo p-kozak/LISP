@@ -19,7 +19,7 @@ typedef struct lispEnvironment lispEnvironment;
 
 //Predefined pointer to a function lispBuiltin. It takes pointers to lispEnvironemnt and lispValue, returns pointer to lispValue.
 //This is quite convoluted syntax
-typedef lispValue*(*lispBuiltIn)(lispEnvironemnt*, lispValue*);
+typedef lispValue*(*lispBuiltIn)(lispEnvironment*, lispValue*);
 
 struct lispValue{
 	int type;
@@ -64,18 +64,19 @@ lispValue* lispValueAddToCell(lispValue* value, lispValue* x);
 lispValue* lispValueTake(lispValue* value, int i);
 lispValue* lispValuePop(lispValue* value, int i);
 
-lispValue* lispValueBuiltInHead(lispValue* value);
-lispValue* lispValueBuiltInTail(lispValue* value);
-lispValue* lispValueBuiltInList(lispValue* value);
-lispValue* lispValueBuiltInJoin(lispValue* value);
+lispValue* lispValueBuiltInHead(lispEnvironment* environment, lispValue* value);
+lispValue* lispValueBuiltInTail(lispEnvironment* environment, lispValue* value);
+lispValue* lispValueBuiltInList(lispEnvironment* environment, lispValue* value);
+lispValue* lispValueBuiltInJoin(lispEnvironment* environment, lispValue* value);
 lispValue* lispValueJoin(lispValue* value, lispValue* toAdd);
-lispValue* lispValueBuiltInLen(lispValue* value);
+lispValue* lispValueBuiltInLen(lispEnvironment* environment, lispValue* value);
 lispValue* lispValueCopy(lispValue* value);
 
 lispEnvironment* lispEnvironmentNew(void);
 void lispEnvironmentDelete(lispEnvironment* environement);
 lispValue* lispEnvironmentGet(lispEnvironment* environment, lispValue* value);
-void lispEnvironmentPut(lispEnvironment* environment, lispValue* oldValue, lispValue* newValue);
+void lispEnvironmentPut(lispEnvironment* environment, lispValue* symbolDummy, lispValue* functionDummy);
+
 
 void lispValueExpressionPrint(lispValue* value, char open, char close);
 

@@ -19,6 +19,8 @@ lispValue* builtInAdd(lispEnvironment* environment, lispValue* value);
 lispValue* builtInSub(lispEnvironment* environment, lispValue* value);
 lispValue* builtInMul(lispEnvironment* environment, lispValue* value);
 lispValue* builtInDiv(lispEnvironment* environment, lispValue* value);
+lispValue* builtInDef(lispEnvironment* environment, lispValue* value);
+
 
 void lispEnvironmentAddBuiltIn(lispEnvironment* environment, char* name, lispBuiltIn function);
 void lispEnvironmentAddBuiltIns(lispEnvironment* environment);

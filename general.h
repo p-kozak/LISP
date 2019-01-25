@@ -9,12 +9,12 @@
 #define LISP_ASSERT(argument, condition, error){ \
 				if(!(condition)) { \
 					lispValueDelete(argument); \
-					return lispValueError("error");\
+					return lispValueError(error);\
 				}\
 			}
 
 //lispValue an lispEnvorinment are cyclic dependant on each other, therefore this forward declaration
-typedef struct lispValue lispValue; 
+typedef struct lispValue lispValue;
 typedef struct lispEnvironment lispEnvironment;
 
 //Predefined pointer to a function lispBuiltin. It takes pointers to lispEnvironemnt and lispValue, returns pointer to lispValue.
@@ -28,7 +28,7 @@ struct lispValue{
 	char* error;
 	char* symbol;
 	//The function pointer:
-	lispBuiltIn function; 
+	lispBuiltIn function;
 	//Counter and a pointer to list of another symbolic expressions
 	int count;
 	struct lispValue** cell;
@@ -37,7 +37,7 @@ struct lispValue{
 struct lispEnvironment{
 	int count;
 	char** symbols;
-	lispValue** values; 
+	lispValue** values;
 
 };
 //Below there is a function pointer.

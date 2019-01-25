@@ -186,10 +186,29 @@ lispValue* lispValueBuiltIn(lispEnvironment* environment, lispValue* value, char
 	return lispValueError("Unknown function");
 }
 
+lispValue* builtInDef(lispEnvironment* environment, lispValue* value){
+	LISP_ASSERT(value, value->cell[0]->type == LISP_VALUE_QUOTED_EXPRESSION, "Function def was passed an incorrect type");
+	//The first element of the input is the list of symbols
+	lispValue* symbols = value->cell[0];
+
+	//Make sure that all elements of the list above are symbols
+	for(int i=0; i < symbols->cell[i]->count; i++){
+		LISP_ASSERT(value, symbols->cell[i]->type == LISP_VALUE_SYMBOL, "Non symbols cannot be defined");
+	}
+	//Make sure that there are as ,amy symbols as arguments
+	LISP_ASSERT(value, symbols->count == value->count-1, "Function 'def' cannot define: incorrect number of values");
+
+	for(int i = 0; i < symbols->count; i++){
+			lispEnvironmentPut(environment, symbols->cell[i], value->cell[i+1]);
+	}
+	lispValueDelete(value);
+	return lispValueSymbolicExpression();
+}
+
 
 void lispEnvironmentAddBuiltIn(lispEnvironment* environment, char* name, lispBuiltIn function) {
 	//This function adds another functions to the environment so they can be executed on the variables from this environment
-	/*This works as lispBuiltIn is defined as 
+	/*This works as lispBuiltIn is defined as
 	lispValue*(*lispBuiltIn)(lispEnvironment*, lispValue*)
 	this means it can take any function taking the same arguments and returning pointer to lispValue */
 	lispValue* symbolDummy = lispValueSymbol(name);
@@ -213,7 +232,7 @@ void lispEnvironmentAddBuiltIns(lispEnvironment* environment) {
 	lispEnvironmentAddBuiltIn(environment, "/", builtInDiv);
 	lispEnvironmentAddBuiltIn(environment, "*", builtInMul);
 
-
 	//other functions
+	lispEnvironmentAddBuiltIn(environment,"def", builtInDef);
 	return;
 }

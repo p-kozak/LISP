@@ -193,7 +193,7 @@ lispValue* builtInDef(lispEnvironment* environment, lispValue* value){
 
 	//Make sure that all elements of the list above are symbols
 	for(int i=0; i < symbols->cell[i]->count; i++){
-		LISP_ASSERT(value, symbols->cell[i]->type == LISP_VALUE_SYMBOL, "Non symbols cannot be defined");
+		LISP_ASSERT(value, symbols->cell[i]->type == LISP_VALUE_SYMBOL, "Non symbols cannot be defined. Argument is %s which is type %s", symbols->cell[i], lispValueReturnType(symbols->cell[i]->type));
 	}
 	//Make sure that there are as ,amy symbols as arguments
 	LISP_ASSERT(value, symbols->count == value->count-1, "Function 'def' cannot define: incorrect number of values");

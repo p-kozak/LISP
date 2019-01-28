@@ -13,13 +13,27 @@ lispValue* lispValueNumber(double x) {
 	return value;
 }
 
-lispValue* lispValueError(char* x) {
+/*This functions supports variable lists of arguments. It can be used to indicate errors. Works in a similar manner to printf*/
+lispValue* lispValueError(char* error, ...) {
 	lispValue* value = malloc(sizeof(lispValue));
 	value->type = LISP_VALUE_ERROR;
-	value->error = malloc(strlen(x)+1);
-	strcpy(value->error, x);
+	/*c stdarg.h variable argument list struct type. Initialisation*/
+	va_list va; 
+	va_start(va, error);
+
+	/*Allcoate memor for error. Hopefully errors won't be longer than 1024*/
+	value->error = malloc(1024);
+
+	/*Printing the error string, max 1023 characters
+	Write formatted data from variable argument list to sized buffer*/
+	vsnprintf(value->error, 1023, error, va);
+	/*Reallocate error to number of bits actually used*/
+	value->error = realloc(value->error, strlen(value->error) + 1);
+	/*Free the va list*/
+	va_end(va);
 	return value;
 }
+
 
 lispValue* lispValueSymbol(char* s) {
 	lispValue* value = malloc(sizeof(lispValue));
@@ -116,7 +130,7 @@ void lispValuePrintNewline(lispValue* value){
 lispValue* lispValueReadNumber(mpc_ast_t* sentence) {
 	errno = 0;
 	double x = strtod(sentence->contents, NULL);
-	return errno != ERANGE ? lispValueNumber(x) : lispValueError("Invalid number");
+	return errno != ERANGE ? lispValueNumber(x) : lispValueError("Invalid number. Got %s", sentence->contents);
 }
 
 lispValue* lispValueRead(mpc_ast_t* sentence) {
@@ -201,7 +215,7 @@ lispValue* lispValueBuiltInHead(lispEnvironment* environment, lispValue* value){
 	//head - takes quoted expression and return only the first element as quoted expression
 
 	//check for errors
-	LISP_ASSERT(value, value->count ==1,"Function 'head' was passed too many arguments");
+	LISP_ASSERT(value, value->count ==1,"Function 'head' was passed too many arguments. Got %i, expected 1", value->count);
 	LISP_ASSERT(value, value->cell[0]->type==LISP_VALUE_QUOTED_EXPRESSION,"Function 'head' was passed an invalid type");
 	LISP_ASSERT(value, value->cell[0]->count != 0,"Function 'head' was passed an empty quoted expression {}");
 
@@ -334,7 +348,7 @@ lispValue* lispEnvironmentGet(lispEnvironment * environment, lispValue * value){
 		}
 	}
 	//Otherwise, return an error
-	return lispValueError("Unbound symbol");
+	return lispValueError("Unbound symbol %s", value->symbol);
 }
 
 void lispEnvironmentPut(lispEnvironment* environment, lispValue* symbolDummy, lispValue* functionDummy) {
@@ -357,5 +371,25 @@ void lispEnvironmentPut(lispEnvironment* environment, lispValue* symbolDummy, li
 	strcpy(environment->symbols[environment->count - 1], symbolDummy->symbol);
 	
 	return;
+}
+
+
+char* lispValueReturnType(int type) {
+	switch (type) {
+	case LISP_VALUE_ERROR:
+		return "Error";
+	case LISP_VALUE_NUMBER:
+		return "Number";
+	case LISP_VALUE_FUNCTION:
+		return "Function";
+	case LISP_VALUE_QUOTED_EXPRESSION:
+		return "Quoted expression";
+	case LISP_VALUE_SYMBOL:
+		return "SYMBOL";
+	case LISP_VALUE_SYMBOLIC_EXPRESSION:
+		return "Symbolic expression";
+	default:
+		return "Unknown type";
+	}
 }
 

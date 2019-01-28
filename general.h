@@ -6,12 +6,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LISP_ASSERT(argument, condition, error){ \
+/*Macro redefined to support variable lists*/
+
+#define LISP_ASSERT(argument, condition, error, ...) \
 				if(!(condition)) { \
+					lispValue* err = lispValueError(error,##__VA_ARGS__); \
 					lispValueDelete(argument); \
-					return lispValueError(error);\
-				}\
-			}
+					return err; \
+				}
 
 //lispValue an lispEnvorinment are cyclic dependant on each other, therefore this forward declaration
 typedef struct lispValue lispValue;
@@ -49,7 +51,7 @@ enum {LISP_VALUE_NUMBER, LISP_VALUE_ERROR, LISP_VALUE_SYMBOL, LISP_VALUE_FUNCTIO
 //enum{ LISP_VALUE_DIVIDE_ZERO, LISP_VALUE_BAD_OPERATOR, LISP_VALUE_BAD_NUMBER};
 
 lispValue* lispValueNumber(double x);
-lispValue* lispValueError(char* x);
+lispValue* lispValueError(char* error, ...);
 lispValue* lispValueSymbol(char* s);
 lispValue* lispValueSymbolicExpression(void);
 lispValue* lispValueQuotedExpression(void);
@@ -79,6 +81,8 @@ void lispEnvironmentPut(lispEnvironment* environment, lispValue* symbolDummy, li
 
 
 void lispValueExpressionPrint(lispValue* value, char open, char close);
+char* lispValueReturnType(int type);
+
 
 
 
